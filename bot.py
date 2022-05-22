@@ -1,10 +1,15 @@
-import discord
+import disnake
 import os
 
-client = discord.Client()
+client = disnake.Client()
 
 PREFIX = ".."
-TOKEN = "token goes here"
+
+tokenFile = open("token.txt","r")
+TOKEN = tokenFile.read()
+if TOKEN == "":
+  raise RuntimeError("No token in token.txt")
+tokenFile.close()
 
 @client.event
 async def on_ready():
@@ -14,13 +19,6 @@ async def on_ready():
 async def on_message(message):
     if not message.content.startswith(PREFIX):
         return
-    command = message.content[len(prefix):]
-    
-    if command == 'fish'
-      await message.channel.send('Fishing successful!')
-
-    if command == '..farm':
-      await message.channel.send('Farming successful!')
-
+    command = message.content[len(PREFIX):]
 
 client.run(TOKEN)
