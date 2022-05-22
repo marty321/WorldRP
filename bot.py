@@ -1,14 +1,15 @@
 import disnake
 import os
+import fileManagement as files
 
-client = disnake.Client()
+intents = disnake.Intents.all()
+client = disnake.Client(intents=intents)
 
 PREFIX = ".."
 
 tokenFile = open("token.txt","r")
 TOKEN = tokenFile.read()
 tokenFile.close()
-print(TOKEN)
 if TOKEN == "":
   f = open("token.txt","w")
   f.close()
@@ -17,7 +18,15 @@ if TOKEN == "":
 
 @client.event
 async def on_ready():
-   print('We have logged in as {0.user}'.format(client))
+   print(f"We have logged in as {client.user}")
+   for guild in client.guilds:
+        print(f"{guild.name} (id:{str(guild.id)})")
+        files.add_server(guild.id)
+        
+
+@client.event
+async def on_guild_join(guild):
+  files.add_server(guild.id)
 
 
 client.run(TOKEN)
