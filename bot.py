@@ -10,6 +10,8 @@ TOKEN = tokenFile.read()
 tokenFile.close()
 print(TOKEN)
 if TOKEN == "":
+  f = open("token.txt","w")
+  f.close()
   raise RuntimeError("No token in token.txt")
 
 
