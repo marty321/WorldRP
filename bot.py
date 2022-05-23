@@ -28,5 +28,4 @@ async def on_ready():
 async def on_guild_join(guild):
   files.add_server(guild.id)
 
-
 client.run(TOKEN)
