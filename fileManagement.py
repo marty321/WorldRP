@@ -4,8 +4,9 @@ import pickle
 SERVERS_DIR = ".\\servers"
 
 class Player:
-    def __init__(self,_discordID,_cash = 5,_incomeTechs = [],_inventory = {}):
+    def __init__(self,_discordID,_serverID,_cash = 5,_incomeTechs = [],_inventory = {}):
         self.discordID = _discordID
+        self.serverID = _serverID
         self.cash = _cash
         self.incomeTechs = _incomeTechs
         self.inventory = _inventory
@@ -24,7 +25,7 @@ def add_server(guild_id):
         pass
 
 def initialisePlayer(discordID, ServerID):
-    newPlayer = Player(discordID)
+    newPlayer = Player(discordID, ServerID)
     serverPath = os.path.join(SERVERS_DIR,ServerID)
     userPath = os.path.join(serverPath,discordID)
     try:
@@ -46,5 +47,13 @@ def getPlayer(discordID, ServerID):
         initialisePlayer(discordID, ServerID)
         user = getPlayer(discordID, ServerID)
     return user
+
+def savePlayer(user):
+    serverPath = os.path.join(SERVERS_DIR,user.serverID)
+    userPath = os.path.join(serverPath,user.discordID)
+    userFile = open(userPath,"wb")
+    pickle.dump(user, userFile)
+    userFile.close()
+    
     
 
