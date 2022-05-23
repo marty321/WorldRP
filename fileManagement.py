@@ -14,6 +14,7 @@ class Player:
 
 def add_server(guild_id):
     currentServers = [f.path for f in os.scandir(".") if f.is_dir()]
+    files = ["config.txt"]
     if SERVERS_DIR not in currentServers:
         os.mkdir(SERVERS_DIR)
 
@@ -21,6 +22,13 @@ def add_server(guild_id):
         directory = str(guild_id)
         path = os.path.join(SERVERS_DIR, directory)
         os.mkdir(path)
+        for file in files:
+            print(path)
+            newPath = path + f"\\{file}"
+            print(newPath)
+            createFile = open(newPath,"w")
+            createFile.close()
+            
     except FileExistsError:
         pass
 
