@@ -1,11 +1,11 @@
 import disnake
 import os
 import fileManagement as files
+import EconomyInterface as EI
+import botUtils
 
 intents = disnake.Intents.all()
 client = disnake.Client(intents=intents)
-
-PREFIX = ".."
 
 tokenFile = open("token.txt","r")
 TOKEN = tokenFile.read()
@@ -27,5 +27,11 @@ async def on_ready():
 @client.event
 async def on_guild_join(guild):
   files.add_server(guild.id)
+
+@client.event
+async def on_message(message):
+  if message.author == client.user:
+    return
+  await message.channel.send(embed=botUtils.onMessage(message,client))
 
 client.run(TOKEN)

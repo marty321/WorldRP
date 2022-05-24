@@ -2,6 +2,7 @@ import os
 import pickle
 
 SERVERS_DIR = ".\\servers"
+FILES = ["config.txt"]
 
 class Player:
     def __init__(self,_discordID,_serverID,_cash = 5,_incomeTechs = [],_inventory = {}):
@@ -14,7 +15,6 @@ class Player:
 
 def add_server(guild_id):
     currentServers = [f.path for f in os.scandir(".") if f.is_dir()]
-    files = ["config.txt"]
     if SERVERS_DIR not in currentServers:
         os.mkdir(SERVERS_DIR)
 
@@ -22,7 +22,7 @@ def add_server(guild_id):
         directory = str(guild_id)
         path = os.path.join(SERVERS_DIR, directory)
         os.mkdir(path)
-        for file in files:
+        for file in FILES:
             print(path)
             newPath = path + f"\\{file}"
             print(newPath)
@@ -40,6 +40,7 @@ def initialisePlayer(discordID, ServerID):
         testOpen = open(userPath,"r")
         testOpen.close()
     except FileNotFoundError:
+        print(discordID)
         userFile = open(userPath,"wb")
         pickle.dump(newPlayer, userFile)
         userFile.close()
@@ -62,6 +63,12 @@ def savePlayer(user):
     userFile = open(userPath,"wb")
     pickle.dump(user, userFile)
     userFile.close()
+
+def getAllPlayers(serverID):
+    serverPath = os.path.join(SERVERS_DIR,serverID)
+    fileList = [f for f in os.listdir(serverPath) if os.path.isfile(os.path.join(serverPath, f)) and f not in FILES]
+    return fileList
+    
     
     
 
