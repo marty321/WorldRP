@@ -16,15 +16,15 @@ def minusMoney(discordID,serverID,amount):
 def addInv(discordID,serverID,item, amount):
     player = files.getPlayer(discordID,serverID)
     try:
-        player.inventory[item] += amount
+        player.inventory[item] += int(amount)
     except KeyError:
-        player.inventory[item] = amount
-    savePlayer(player)
+        player.inventory[item] = int(amount)
+    files.savePlayer(player)
 
 def removeInv(discordID,serverID,item, amount):
     player = files.getPlayer(discordID,serverID)
-    player.inventory[item] -= amount
-    savePlayer(player)
+    player.inventory[item] -= int(amount)
+    files.savePlayer(player)
 
 def getInvAmount(discordID,serverID,item):
     try:
