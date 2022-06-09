@@ -1,6 +1,7 @@
 import EconomyInterface as EI
 import fileManagement as files
 import disnake
+import discordUtils as DU
 
 PREFIX = ".."
 
@@ -8,7 +9,7 @@ def onMessage(message, client):
     args = message.content[len(PREFIX):].split(" ")
     while "" in args:
         args.remove("")
-    command = args.pop(0)
+    command = args.pop(0).lower()
 
     returnMessage,embed,file = None,None,None
     
@@ -18,23 +19,40 @@ def onMessage(message, client):
         embed = topTenFormat(str(message.guild.id),client)
 
     elif command == "player":
-        embed = embedFormat(args[0], str(message.guild.id), client)
+        discordID = DU.getDiscordID(args[0])
+        embed = playerFormat(discordID, str(message.guild.id), client)
 
     elif command == "addinventory":
-        if args[0].endswith(">") and args[0].startswith("<@"):
-            discordID = args[0][2:-1]
-            EI.addInv(discordID,str(message.guild.id),args[1],args[2])
+        discordID = DU.getDiscordID(args[0])
+        EI.addInv(discordID,str(message.guild.id),args[1],args[2])
 
     elif command == "removeinventory":
-        if args[0].endswith(">") and args[0].startswith("<@"):
-            discordID = args[0][2:-1]
-            print(args)
-            EI.removeInv(discordID,str(message.guild.id),args[1],args[2])
+        discordID = DU.getDiscordID(args[0])
+        EI.removeInv(discordID,str(message.guild.id),args[1],args[2])
+
+    elif command == "addmoney":
+        discordID = DU.getDiscordID(args[0])
+        EI.addMoney(discordID,str(message.guild.id),args[1])
+
+    elif command == "removemoney":
+        discordID = DU.getDiscordID(args[0])
+        EI.minusMoney(discordID,str(message.guild.id),args[1])
+
+    elif command == "addincome":
+        discordID = DU.getDiscordID(args[0])
+        EI.addIncome(discordID,str(message.guild.id),args[1])
+
+    elif command == "removeincome":
+        discordID = DU.getDiscordID(args[0])
+        EI.removeIncome(discordID,str(message.guild.id),args[1])
+
+    elif command == "config":
+        pass
 
     return returnMessage,embed,file
 
 def topTenFormat(serverID, client):
-    topTenDict = EI.getTopTen(serverID)
+    topTen = EI.getTopTen(serverID)
 
     lbEmbed = disnake.Embed(
         title="Leaderboard",
@@ -42,22 +60,18 @@ def topTenFormat(serverID, client):
 
     place = 1
     
-    for player in topTenDict:
-        user = f"{place}) {client.get_user(int(player))}"
+    for player in topTen:
+        user = f"{place}) {client.get_user(int(player[0]))}"
         lbEmbed.add_field(
             name = user,
-            value = topTenDict[player],
+            value = player[1],
             inline=False
             )
         place += 1
 
     return lbEmbed
 
-def embedFormat(discordID, serverID, client):
-    if not(discordID.endswith(">") and discordID.startswith("<@")):
-        return
-    discordID = discordID[2:-1]
-    
+def playerFormat(discordID, serverID, client):
     player = files.getPlayer(discordID,serverID)
     playerEmbed = disnake.Embed(
         title = client.get_user(int(discordID)).name,
@@ -71,7 +85,8 @@ def embedFormat(discordID, serverID, client):
 
     techString = ""
     for income in player.incomeTechs:
-        techString += ",",income
+        techString += income + ", "
+    techString = techString[:-2]
     if techString == "":
         techString = "None"
     playerEmbed.add_field(

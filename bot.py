@@ -32,7 +32,11 @@ async def on_guild_join(guild):
 async def on_message(message):
   if message.author == client.user:
     return
-  returnMessage,embed,file = botUtils.onMessage(message,client)
+  try:
+    returnMessage,embed,file = botUtils.onMessage(message,client)
+  except RuntimeError as e:
+    returnMessage = e
+    
   await message.channel.send(returnMessage,embed=embed,file=file)
 
 client.run(TOKEN)

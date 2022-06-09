@@ -5,13 +5,13 @@ import collections
 
 def addMoney(discordID,serverID,amount):
     player = files.getPlayer(discordID,serverID)
-    player.cash += amount
-    savePlayer(player)
+    player.cash += int(amount)
+    files.savePlayer(player)
 
 def minusMoney(discordID,serverID,amount):
     player = files.getPlayer(discordID,serverID)
-    player.cash -= amount
-    savePlayer(player)
+    player.cash -= int(amount)
+    files.savePlayer(player)
 
 def addInv(discordID,serverID,item, amount):
     player = files.getPlayer(discordID,serverID)
@@ -33,6 +33,16 @@ def getInvAmount(discordID,serverID,item):
         return 0
     return player.inventory[item]
 
+def addIncome(discordID,serverID,income):
+    player = files.getPlayer(discordID,serverID)
+    player.incomeTechs.append(income)
+    files.savePlayer(player)
+
+def removeIncome(discordID, serverID, income):
+    player = files.getPlayer(discordID,serverID)
+    player.incomeTechs.remove(income)
+    files.savePlayer(player)
+
 def getCashAmount(discordId,serverID):
     player = files.getPlayer(discordID,serverID)
     return player.cash
@@ -43,15 +53,24 @@ def getIncomeTechs(discordId,serverID):
 
 def getTopTen(serverID):
     allPlayers = files.getAllPlayers(serverID)
-    topTen = {}
-    minCash = 0
+    allUsers = {}
     for player in allPlayers:
-        player = files.getPlayer(player, serverID)
-        if player.cash > minCash:
-            topTen[player.discordID] = player.cash
-    
-    sortedTopTen = sorted(topTen.items(),key=operator.itemgetter(1))
-    sortedTopTenDict = dict(collections.OrderedDict(sortedTopTen))
-    
-    return sortedTopTenDict
+        player = files.getPlayer(player,serverID)
+        try:
+            allUsers[player.cash].append(player.discordID)
+        except KeyError:
+            allUsers[player.cash] = [player.discordID]
+
+    moneyAmounts = list(allUsers.keys())
+    moneyAmounts.sort(reverse=True)
+    topTen = []
+    for amount in moneyAmounts:
+        for player in allUsers[amount]:
+            topTen.append((player, amount))
+        if len(topTen) >= 10:
+            break
+
+    print(topTen)
+        
+    return topTen
 
