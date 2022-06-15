@@ -2,11 +2,28 @@ import EconomyInterface as EI
 import fileManagement as files
 import disnake
 import discordUtils as DU
+import configManager as configs
 
-PREFIX = ".."
 
 def onMessage(message, client):
-    args = message.content[len(PREFIX):].split(" ")
+    blacklisted = configs.getConfig(str(message.guild.id), "blacklist")
+    whitelisted = configs.getConfig(str(message.guild.id), "whitelist")
+    
+    prefix = configs.getConfig(str(message.guild.id),"serverPrefix")
+    selfPing = DU.pingUser(str(client.user.id))
+    messageContent = message.content.strip()
+    if messageContent.startswith(selfPing):
+        prefix = selfPing
+        
+    elif not messageContent.startswith(prefix):
+        return None,None,None
+    elif whitelisted:
+        if str(message.channel.id) not in whitelisted:
+            return None,None,None
+    elif str(message.channel.id) in blacklisted:
+        return None,None,None
+    
+    args = message.content[len(prefix):].split(" ")
     while "" in args:
         args.remove("")
     command = args.pop(0).lower()
@@ -14,45 +31,73 @@ def onMessage(message, client):
     returnMessage,embed,file = None,None,None
     
     files.initialisePlayer(str(message.author.id),str(message.guild.id))
+
+    serverID = str(message.guild.id)
     
     if command == "leaderboard":
-        embed = topTenFormat(str(message.guild.id),client)
+        embed = topTenFormat(serverID,client)
 
     elif command == "player":
-        discordID = DU.getDiscordID(args[0])
-        embed = playerFormat(discordID, str(message.guild.id), client)
+        discordID = str(message.author.id)
+        if args:
+            discordID = DU.getDiscordID(args[0])
+        embed = playerFormat(discordID,serverID, client)
 
+    elif command == "prefix":
+        prefix = configs.getConfig(serverID,"serverPrefix")
+        returnMessage = f"prefix is {prefix}"
+
+    elif command == "collect":
+        discordID = str(message.author.id)
+        serverID = str(message.guild.id)
+        returnMessage,embed,file = EI.collect(serverID, discordID)
+        
+    elif not DU.checkPermissions(message.author, serverID):
+        pass
+    
     elif command == "addinventory":
         discordID = DU.getDiscordID(args[0])
-        EI.addInv(discordID,str(message.guild.id),args[1],args[2])
+        EI.addInv(discordID,serverID,args[1],args[2])
 
     elif command == "removeinventory":
         discordID = DU.getDiscordID(args[0])
-        EI.removeInv(discordID,str(message.guild.id),args[1],args[2])
+        EI.removeInv(discordID,serverID,args[1],args[2])
 
     elif command == "addmoney":
         discordID = DU.getDiscordID(args[0])
-        EI.addMoney(discordID,str(message.guild.id),args[1])
+        EI.addMoney(discordID,serverID,args[1])
 
     elif command == "removemoney":
         discordID = DU.getDiscordID(args[0])
-        EI.minusMoney(discordID,str(message.guild.id),args[1])
+        EI.minusMoney(discordID,serverID,args[1])
 
     elif command == "addincome":
         discordID = DU.getDiscordID(args[0])
-        EI.addIncome(discordID,str(message.guild.id),args[1])
+        EI.addIncome(discordID,serverID,args[1])
 
     elif command == "removeincome":
         discordID = DU.getDiscordID(args[0])
-        EI.removeIncome(discordID,str(message.guild.id),args[1])
+        EI.removeIncome(discordID,serverID,args[1])
+
+    elif command == "resetplayer":
+        discordID = DU.getDiscordID(args[0])
+        files.deletePlayer(discordID,serverID)
+        files.initialisePlayer(discordID,serverID)
+
+    elif command == "setincomerole":
+        name = args.pop(0)
+        time = args.pop(-1)
+        files.setIncome(serverID,name,args,time)
 
     elif command == "config":
-        pass
+        returnMessage,embed,file = configs.onMessage(args, str(message.guild.id))
 
     return returnMessage,embed,file
 
 def topTenFormat(serverID, client):
     topTen = EI.getTopTen(serverID)
+
+    cashSymbol = configs.getConfig(serverID, "serverCurrencySymbol")
 
     lbEmbed = disnake.Embed(
         title="Leaderboard",
@@ -64,7 +109,7 @@ def topTenFormat(serverID, client):
         user = f"{place}) {client.get_user(int(player[0]))}"
         lbEmbed.add_field(
             name = user,
-            value = player[1],
+            value = f"{player[1]} {cashSymbol}",
             inline=False
             )
         place += 1
@@ -73,13 +118,15 @@ def topTenFormat(serverID, client):
 
 def playerFormat(discordID, serverID, client):
     player = files.getPlayer(discordID,serverID)
+    cashSymbol = configs.getConfig(serverID, "serverCurrencySymbol")
+    
     playerEmbed = disnake.Embed(
         title = client.get_user(int(discordID)).name,
         color=disnake.Colour.blue())
 
     playerEmbed.add_field(
         name="Cash",
-        value=player.cash,
+        value=f"{player.cash} {cashSymbol}",
         inline=False
         )
 

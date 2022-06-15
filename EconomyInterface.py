@@ -2,6 +2,9 @@ import fileManagement as files
 import botUtils
 import operator
 import collections
+import time
+import configManager as configs
+import math
 
 def addMoney(discordID,serverID,amount):
     player = files.getPlayer(discordID,serverID)
@@ -70,7 +73,35 @@ def getTopTen(serverID):
         if len(topTen) >= 10:
             break
 
-    print(topTen)
-        
     return topTen
+
+def collect(serverID, discordID):
+    player = files.getPlayer(discordID, serverID)
+    returnMessage,embed,file = None,None,None
+    currentTime = time.time()
+
+    for income in player.incomeTechs:
+        timer = player.incomeTechs[income]
+
+        timeLeft = timer - currentTime
+        if timeLeft <= 0:
+            timeLeft = 0
+        else:
+            timeLeft = round(abs(timeLeft))
+            
+        if timeLeft <= 0:
+            player.cash += 1
+            symbol = configs.getConfig(serverID, "serverCurrencySymbol")
+            returnMessage = f"you collected a {symbol}"
+            while player.incomeTechs["default"] < currentTime:
+                player.incomeTech["default"] += 60
+        else:
+            returnMessage = f"you have {timeLeft} seconds until you can collect"
+
+    files.savePlayer(player)
+    
+
+    return returnMessage,embed,file
+
+    
 
