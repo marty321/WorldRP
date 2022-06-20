@@ -117,7 +117,7 @@ def setIncomeRole(serverID,name,amount,time):
             time *= 60
             unit = "s"
         
-        line = f"{name},{str(amount)},{time}"
+        line = f"{name},{str(amount)},{time}\n"
         incomeFile.write(line)
 
 def getIncomeRoles(serverID):
@@ -126,9 +126,19 @@ def getIncomeRoles(serverID):
     incomeRoles = {}
     with open(incomePath, "r") as incomeFile:
         for line in incomeFile:
-            splitAmount = re.split("[]",line)
+            splitAmount = re.split(",",line)
             name = splitAmount[0]
-            
+            amount = splitAmount[1]
+            time = splitAmount[2]
+            incomeRoles[name] = (int(amount),int(time))
+    return incomeRoles
 
-    
+def giveIncomeRoles(name,discordID,serverID):
+    roles = getIncomeRoles(serverID)
+    if name not in roles:
+        return
+    if name != "all":
+        player = getPlayer(discordID,serverID)
+        player.incomeTechs[name] = 0
+        savePlayer(player)
 

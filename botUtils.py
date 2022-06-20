@@ -89,6 +89,16 @@ def onMessage(message, client):
         amount = args.pop(0)
         time = args.pop(0)
         files.setIncomeRole(serverID,name,amount,time)
+
+    elif command == "giveincomerole":
+        name = args[1]
+        if args[0] == "all":
+            discordID = args[0]
+        else:
+            discordID = DU.getDiscordID(args[0])
+        files.giveIncomeRoles(name,discordID,serverID)
+            
+        
             
     elif command == "config":
         returnMessage,embed,file = configs.onMessage(args, str(message.guild.id))

@@ -77,12 +77,14 @@ def getTopTen(serverID):
 
 def collect(serverID, discordID):
     player = files.getPlayer(discordID, serverID)
-    returnMessage,embed,file = None,None,None
+    returnMessage,embed,file = "",None,None
     currentTime = time.time()
-
+    roles = files.getIncomeRoles(serverID)
+    
     for income in player.incomeTechs:
+        currentRole = roles[income]
+        role = files
         timer = player.incomeTechs[income]
-
         timeLeft = timer - currentTime
         if timeLeft <= 0:
             timeLeft = 0
@@ -90,13 +92,18 @@ def collect(serverID, discordID):
             timeLeft = round(abs(timeLeft))
             
         if timeLeft <= 0:
-            player.cash += 1
+            player.cash += currentRole[0]
             symbol = configs.getConfig(serverID, "serverCurrencySymbol")
-            returnMessage = f"you collected a {symbol}"
-            while player.incomeTechs["default"] < currentTime:
-                player.incomeTech["default"] += 60
+            returnMessage += f"you collected {currentRole[0]} {symbol}\n"
+
+            diff = (currentTime - timer)
+            divisions = diff // currentRole[1]
+            player.incomeTechs[income] += (currentRole[1] * divisions)
+            
+            while player.incomeTechs[income] < currentTime:
+                player.incomeTechs[income] += currentRole[1]
         else:
-            returnMessage = f"you have {timeLeft} seconds until you can collect"
+            returnMessage += f"you have {timeLeft} seconds until you can collect\n"
 
     files.savePlayer(player)
     
