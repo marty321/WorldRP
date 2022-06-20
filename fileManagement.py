@@ -106,7 +106,7 @@ def setIncomeRole(serverID,name,amount,time):
     incomePath = os.path.join(serverPath,FILES["income"])
     with open(incomePath, "a") as incomeFile:
         unit = time[-1]
-        time = time[:-1]
+        time = int(time[:-1])
         if unit == "d":
             time *= 24
             unit = "h"
@@ -128,6 +128,7 @@ def getIncomeRoles(serverID):
         for line in incomeFile:
             splitAmount = re.split("[]",line)
             name = splitAmount[0]
+            
 
     
 

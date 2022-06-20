@@ -86,9 +86,10 @@ def onMessage(message, client):
 
     elif command == "setincomerole":
         name = args.pop(0)
-        time = args.pop(-1)
-        files.setIncome(serverID,name,args,time)
-
+        amount = args.pop(0)
+        time = args.pop(0)
+        files.setIncomeRole(serverID,name,amount,time)
+            
     elif command == "config":
         returnMessage,embed,file = configs.onMessage(args, str(message.guild.id))
 

@@ -102,6 +102,3 @@ def collect(serverID, discordID):
     
 
     return returnMessage,embed,file
-
-    
-
