@@ -5,6 +5,7 @@ import collections
 import time
 import configManager as configs
 import math
+import disnake
 
 def addMoney(discordID,serverID,amount):
     player = files.getPlayer(discordID,serverID)
@@ -36,14 +37,9 @@ def getInvAmount(discordID,serverID,item):
         return 0
     return player.inventory[item]
 
-def addIncome(discordID,serverID,income):
-    player = files.getPlayer(discordID,serverID)
-    player.incomeTechs.append(income)
-    files.savePlayer(player)
-
 def removeIncome(discordID, serverID, income):
     player = files.getPlayer(discordID,serverID)
-    player.incomeTechs.remove(income)
+    player.incomeTechs.pop(income)
     files.savePlayer(player)
 
 def getCashAmount(discordId,serverID):
@@ -77,7 +73,12 @@ def getTopTen(serverID):
 
 def collect(serverID, discordID):
     player = files.getPlayer(discordID, serverID)
-    returnMessage,embed,file = "",None,None
+    returnMessage,file = None,None
+
+    embed = disnake.Embed(
+        title="Collection",
+        color=disnake.Colour.blue())
+    
     currentTime = time.time()
     roles = files.getIncomeRoles(serverID)
     
@@ -86,6 +87,7 @@ def collect(serverID, discordID):
         role = files
         timer = player.incomeTechs[income]
         timeLeft = timer - currentTime
+        print(timeLeft)
         if timeLeft <= 0:
             timeLeft = 0
         else:
@@ -94,16 +96,27 @@ def collect(serverID, discordID):
         if timeLeft <= 0:
             player.cash += currentRole[0]
             symbol = configs.getConfig(serverID, "serverCurrencySymbol")
-            returnMessage += f"you collected {currentRole[0]} {symbol}\n"
+            
+            embed.add_field(
+                name=income,
+                value = f"you collected {currentRole[0]} {symbol}\n",
+                inline=False
+                )
 
             diff = (currentTime - timer)
             divisions = diff // currentRole[1]
             player.incomeTechs[income] += (currentRole[1] * divisions)
+
+            
             
             while player.incomeTechs[income] < currentTime:
                 player.incomeTechs[income] += currentRole[1]
         else:
-            returnMessage += f"you have {timeLeft} seconds until you can collect\n"
+            embed.add_field(
+                name=income,
+                value = f"you have {timeLeft} seconds until you can collect\n",
+                inline=False
+                )
 
     files.savePlayer(player)
     

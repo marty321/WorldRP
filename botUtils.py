@@ -71,11 +71,7 @@ def onMessage(message, client):
         discordID = DU.getDiscordID(args[0])
         EI.minusMoney(discordID,serverID,args[1])
 
-    elif command == "addincome":
-        discordID = DU.getDiscordID(args[0])
-        EI.addIncome(discordID,serverID,args[1])
-
-    elif command == "removeincome":
+    elif command == "removeincomerole":
         discordID = DU.getDiscordID(args[0])
         EI.removeIncome(discordID,serverID,args[1])
 

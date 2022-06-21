@@ -30,6 +30,12 @@ def add_server(guild_id):
             newPath = path + f"\\{file}"
             createFile = open(newPath,"w")
             createFile.close()
+
+        allfile = os.path.join(path,"all")
+        player = Player("all",str(guild_id))
+        with open(allfile, "wb") as f:
+            pickle.dump(player, f)
+            
             
     except FileExistsError:
         pass
@@ -40,16 +46,18 @@ def deletePlayer(discordID,serverID):
     os.remove(userPath)
     
 def initialisePlayer(discordID, ServerID):
-    newPlayer = Player(discordID, ServerID)
     serverPath = os.path.join(SERVERS_DIR,ServerID)
     userPath = os.path.join(serverPath,discordID)
     try:
         testOpen = open(userPath,"r")
         testOpen.close()
     except FileNotFoundError:
-        userFile = open(userPath,"wb")
-        pickle.dump(newPlayer, userFile)
-        userFile.close()
+        with open(userPath,"wb") as userFile:
+            allPlayer = getPlayer("all",ServerID)
+            print(allPlayer.incomeTechs)
+            newPlayer = Player(discordID, ServerID, _incomeTechs=allPlayer.incomeTechs)
+            print(newPlayer.incomeTechs)
+            pickle.dump(newPlayer, userFile)
 
 def getPlayer(discordID, serverID):
     serverPath = os.path.join(SERVERS_DIR,serverID)
@@ -66,9 +74,8 @@ def getPlayer(discordID, serverID):
 def savePlayer(user):
     serverPath = os.path.join(SERVERS_DIR,user.serverID)
     userPath = os.path.join(serverPath,user.discordID)
-    userFile = open(userPath,"wb")
-    pickle.dump(user, userFile)
-    userFile.close()
+    with open(userPath,"wb") as userFile:
+        pickle.dump(user, userFile)
 
 def getAllPlayers(serverID):
     serverPath = os.path.join(SERVERS_DIR,serverID)
@@ -112,7 +119,7 @@ def setIncomeRole(serverID,name,amount,time):
             unit = "h"
         if unit == "h":
             time *= 60
-            unti = "m"
+            unit = "m"
         if unit == "m":
             time *= 60
             unit = "s"
@@ -137,8 +144,12 @@ def giveIncomeRoles(name,discordID,serverID):
     roles = getIncomeRoles(serverID)
     if name not in roles:
         return
-    if name != "all":
-        player = getPlayer(discordID,serverID)
-        player.incomeTechs[name] = 0
-        savePlayer(player)
-
+    player = getPlayer(discordID,serverID)
+    player.incomeTechs[name] = 0
+    savePlayer(player)
+    if discordID == "all":
+        for userID in getAllPlayers(serverID):
+            print(userID)
+            player = getPlayer(userID,serverID)
+            player.incomeTechs[name] = 0
+            savePlayer(player)
