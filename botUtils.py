@@ -3,6 +3,7 @@ import fileManagement as files
 import disnake
 import discordUtils as DU
 import configManager as configs
+import itemManager as items
 
 
 def onMessage(message, client):
@@ -23,7 +24,8 @@ def onMessage(message, client):
     elif str(message.channel.id) in blacklisted:
         return None,None,None
     
-    args = message.content[len(prefix):].split(" ")
+    args = message.content[len(prefix):].lower()
+    args = args.split(" ")
     while "" in args:
         args.remove("")
     command = args.pop(0).lower()
@@ -93,9 +95,10 @@ def onMessage(message, client):
         else:
             discordID = DU.getDiscordID(args[0])
         files.giveIncomeRoles(name,discordID,serverID)
-            
+
+    elif command == "item":
+        returnMessage,embed,file = items.onItemMessage(args,serverID)
         
-            
     elif command == "config":
         returnMessage,embed,file = configs.onMessage(args, str(message.guild.id))
 

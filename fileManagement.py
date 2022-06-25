@@ -2,11 +2,13 @@ import os
 import pickle
 import time
 import re
+import disnake
 
 SERVERS_DIR = ".\\servers"
 FILES = {"config": "config.txt",
          "perms": "perms.txt",
-         "income": "incomeRoles.txt"}
+         "income": "incomeRoles.txt",
+         "items": "items/"}
 
 class Player:
     def __init__(self,_discordID,_serverID,_cash = 5,_incomeTechs = {},_inventory = {}):
@@ -27,7 +29,13 @@ def add_server(guild_id):
         path = os.path.join(SERVERS_DIR, directory)
         os.mkdir(path)
         for file in FILES.values():
-            newPath = path + f"\\{file}"
+            newPath = path
+            if file.endswith("/"):
+                newPath += f"\\{file[:-1]}"
+                os.mkdir(newPath)
+                continue
+            
+            newPath += f"\\{file}"
             createFile = open(newPath,"w")
             createFile.close()
 
@@ -153,3 +161,25 @@ def giveIncomeRoles(name,discordID,serverID):
             player = getPlayer(userID,serverID)
             player.incomeTechs[name] = 0
             savePlayer(player)
+
+def saveItem(item):
+    itemsDir = FILES["items"][:-1]
+    serverPath = os.path.join(SERVERS_DIR,item.serverID)
+    itemPath = serverPath + f"\\{itemsDir}\\{item.name}"
+    with open(itemPath,"wb") as itemFile:
+        pickle.dump(item, itemFile)
+
+def getItem(itemName, serverID):
+    itemsDir = FILES["items"][:-1]
+    serverPath = os.path.join(SERVERS_DIR,serverID)
+    itemPath = serverPath + f"\\{itemsDir}\\{itemName}"
+    with open(itemPath,"rb") as itemFile:
+        item = pickle.load(itemFile)
+    return item
+
+def getAllItems(serverID):
+    itemsDir = FILES["items"][:-1]
+    serverPath = os.path.join(SERVERS_DIR,serverID)
+    itemsPath = serverPath + f"\\{itemsDir}"
+    itemList = [f for f in os.listdir(itemsPath) if os.path.isfile(os.path.join(itemsPath, f))]
+    return itemList
