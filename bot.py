@@ -4,6 +4,7 @@ import fileManagement as files
 import EconomyInterface as EI
 import botUtils
 
+
 intents = disnake.Intents.all()
 client = disnake.Client(intents=intents)
 

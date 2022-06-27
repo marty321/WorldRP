@@ -53,6 +53,16 @@ def onMessage(message, client):
         discordID = str(message.author.id)
         serverID = str(message.guild.id)
         returnMessage,embed,file = EI.collect(serverID, discordID)
+
+    elif command == "shop":
+        embed = items.shop(serverID)
+    elif command == "buy":
+        discordID = str(message.author.id)
+        try:
+            amount = int(args[1])
+        except IndexError:
+            amount = 1
+        returnMessage= items.buy(discordID, serverID,args[0],amount,message.guild)
         
     elif not DU.checkPermissions(message.author, serverID):
         pass

@@ -11,12 +11,13 @@ FILES = {"config": "config.txt",
          "items": "items/"}
 
 class Player:
-    def __init__(self,_discordID,_serverID,_cash = 5,_incomeTechs = {},_inventory = {}):
+    def __init__(self,_discordID,_serverID,_cash = 5,_incomeTechs = {},_inventory = {}, _roles = []):
         self.discordID = _discordID
         self.serverID = _serverID
         self.cash = _cash
         self.incomeTechs = _incomeTechs
         self.inventory = _inventory
+        self.roles = _roles
         
 
 def add_server(guild_id):
@@ -161,6 +162,16 @@ def giveIncomeRoles(name,discordID,serverID):
             player = getPlayer(userID,serverID)
             player.incomeTechs[name] = 0
             savePlayer(player)
+
+class Item:
+    def __init__(self, name, serverID, description=None, requirements=[], isSingleBuy=False, rewards=[], isConsumable=True):
+        self.name = name
+        self.description = description
+        self.requirements = requirements #rank.{rankname} cash.{amount} incomeRole
+        self.isSingleBuy = isSingleBuy
+        self.rewards = rewards
+        self.isConsumable = isConsumable
+        self.serverID = serverID
 
 def saveItem(item):
     itemsDir = FILES["items"][:-1]
