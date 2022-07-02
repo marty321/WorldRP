@@ -54,8 +54,10 @@ def onMessage(message, client):
         serverID = str(message.guild.id)
         returnMessage,embed,file = EI.collect(serverID, discordID)
 
+
     elif command == "shop":
         embed = items.shop(serverID)
+        
     elif command == "buy":
         discordID = str(message.author.id)
         try:
@@ -63,6 +65,15 @@ def onMessage(message, client):
         except IndexError:
             amount = 1
         returnMessage= items.buy(discordID, serverID,args[0],amount,message.guild)
+        
+    elif command == "use":
+        discordID = str(message.author.id)
+        try:
+            amount = int(args[1])
+        except IndexError:
+            amount = 1
+        returnMessage = items.use(discordID, serverID, args[0], amount, message.guild)
+    
         
     elif not DU.checkPermissions(message.author, serverID):
         pass
@@ -107,7 +118,7 @@ def onMessage(message, client):
         files.giveIncomeRoles(name,discordID,serverID)
 
     elif command == "item":
-        returnMessage,embed,file = items.onItemMessage(args,serverID)
+        returnMessage,embed,file = items.onItemMessage(args,message.guild)
         
     elif command == "config":
         returnMessage,embed,file = configs.onMessage(args, str(message.guild.id))
